@@ -27,13 +27,15 @@ class Power(db.Model):
     hero_power = db.relationship('HeroPower', backref ='power')
 
 
-class HeroPower(db.model):
+class HeroPower(db.Model):
     __tablename__ = 'heropowers'
 
     id = db.Column(db.Integer, primary_key=True)
     strength = db.Column(db.String)
     herro_id = db.Column(db.Integer, db.ForeignKey('heroes.id'))
     power_id = db.Column(db.Integer, db.ForeignKey('powers.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
 
