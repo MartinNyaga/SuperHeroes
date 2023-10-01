@@ -1,10 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy.orm import validates
+from sqlalchemy_serializer import SerializerMixin
 
 db = SQLAlchemy()
 
-class Hero(db.Model):
+class Hero(db.Model, SerializerMixin):
     __tablename__ = 'heroes'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -15,8 +16,11 @@ class Hero(db.Model):
 
     hero_power = db.relationship('HeroPower', backref='hero')
 
+    serialize_rules = ('-hero_power',)
 
-class Power(db.Model):
+
+
+class Power(db.Model, SerializerMixin):
     __tablename__ = 'powers'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +31,8 @@ class Power(db.Model):
 
     hero_power = db.relationship('HeroPower', backref ='power')
 
+    serialize_rules = ('-hero_power',)
+
     @validates('description')
     def validate_description(self, key, descriptions):
         if not descriptions or len(descriptions) < 20:
@@ -34,7 +40,7 @@ class Power(db.Model):
         return descriptions
 
 
-class HeroPower(db.Model):
+class HeroPower(db.Model, SerializerMixin):
     __tablename__ = 'heropowers'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +49,8 @@ class HeroPower(db.Model):
     power_id = db.Column(db.Integer, db.ForeignKey('powers.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    serialize_rules = ('-hero', '-power',)
 
     @validates('strength')
     def validate_strength(self, key, strengths):
