@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, make_response, jsonify
+from flask import Flask, make_response, jsonify, request
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
@@ -89,9 +89,47 @@ class PowersByID(Resource):
             "description": power.description,
         }
         return response_dict, 200
+    
+    def patch(self, id):
+        power = Power.query.filter(Power.id == id).first()
+        if not power:
+            return {"error": "Power not found"}, 404
+
+        for attr in request.form:
+            if attr == 'description':
+                setattr(power, attr, request.form.get(attr))
+
+        db.session.commit()
+
+        power_dict = {
+            "id": power.id,
+            "name": power.name,
+            "description": power.description,
+        }
+
+        return make_response(jsonify(power_dict), 200)
 
     
 api.add_resource(PowersByID, '/powers/<int:id>')
+
+class HeroPower(Resource):
+    
+    def post(self):
+        data = request.get_json()
+        new_hero_power = HeroPower(
+            strength = data.get('strength'),
+            power_id = data.get('power_id'),
+            hero_id = data.get('hero_id')
+        )
+        db.session.add(new_hero_power)
+        db.session.commit()
+        
+        if new_hero_power:
+            return make_response(jsonify(new_hero_power.to_dict), 200)
+        else:
+            return make_response(jsonify({"errors": ["validation errors"]}), 404)
+        
+api.add_resource(HeroPower, '/heropowers')
 
 
 if __name__ == '__main__':
