@@ -116,20 +116,26 @@ class HeroPower(Resource):
     
     def post(self):
         data = request.get_json()
-        new_hero_power = HeroPower(
-            strength = data.get('strength'),
-            power_id = data.get('power_id'),
-            hero_id = data.get('hero_id')
-        )
+        
+        strength = data.get('strength')
+        power_id = data.get('power_id')
+        hero_id = data.get('hero_id')
+        
+        new_hero_power = HeroPower()
+        new_hero_power.strength = strength
+        new_hero_power.power_id = power_id
+        new_hero_power.hero_id = hero_id
+        
         db.session.add(new_hero_power)
         db.session.commit()
         
-        if new_hero_power:
-            return make_response(jsonify(new_hero_power.to_dict), 200)
+        if new_hero_power.id:
+            return make_response(jsonify(new_hero_power.to_dict()), 201)
         else:
             return make_response(jsonify({"errors": ["validation errors"]}), 404)
-        
+
 api.add_resource(HeroPower, '/heropowers')
+
 
 
 if __name__ == '__main__':
